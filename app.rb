@@ -4,19 +4,30 @@ require "httparty"
 def view(template); erb template.to_sym; end
 
 get "/" do
-  ### Get the weather
-  # Evanston, Kellogg Global Hub... replace with a different location if you want
   lat = 42.0574063
   long = -87.6722787
 
-  units = "imperial" # or metric, whatever you like
-  key = "YOUR-API-KEY-GOES-HERE" # replace this with your real OpenWeather API key
+  units = "imperial" 
+  weatherkey = "3a00ff0f6b42b1db69b14e91227809d8" 
 
-  # construct the URL to get the API data (https://openweathermap.org/api/one-call-api)
-  url = "https://api.openweathermap.org/data/2.5/onecall?lat=#{lat}&lon=#{long}&units=#{units}&appid=#{key}"
+ url = "https://api.openweathermap.org/data/2.5/onecall?lat=#{lat}&lon=#{long}&units=#{units}&appid=#{weatherkey}"
+ @forecast = HTTParty.get(url).parsed_response.to_hash
 
-  # make the call
-  @forecast = HTTParty.get(url).parsed_response.to_hash
+puts "It is currently #{forecast["current"]["temp"]} degrees and #{forecast["current"]["weather"][0]["description"]}"
+puts "Extended forecast:"
+day_number = 1
+for day in forecast["daily"]
+   puts "On day #{day_number}, A high of #{day["temp"]["max"]} and #{day["weather"][0]["description"]}"
+   day_number = day_number + 1
 
-  ### Get the news
+newskey = "8af4a07f62b14292a119d44079539a67"
+url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=#{newskey}"
+@news = HTTParty.get(url).parsed_response.to_hash
+
+for headline in news["articles"]
+    puts "Today's top story is #{news["articles"]["source"][0]["headline"]["name"]}"
+
+ view "news"
+
 end
+
